@@ -1,0 +1,59 @@
+Phase 13 branch-prediction assembly evidence
+
+Compiler flags: -O3 -fno-tree-vectorize -mavx
+
+===== classify_branch_into =====
+0000000000000370 <classify_branch_into(Raster const&, float, std::vector<unsigned char, std::allocator<unsigned char> >&)>:
+ 370:	f3 0f 1e fa          	endbr64
+ 374:	48 8b 57 10          	mov    rdx,QWORD PTR [rdi+0x10]
+ 378:	31 c0                	xor    eax,eax
+ 37a:	48 39 57 18          	cmp    QWORD PTR [rdi+0x18],rdx
+ 37e:	74 4b                	je     3cb <classify_branch_into(Raster const&, float, std::vector<unsigned char, std::allocator<unsigned char> >&)+0x5b>
+ 380:	48 8b 0e             	mov    rcx,QWORD PTR [rsi]
+ 383:	c5 fa 10 0c 82       	vmovss xmm1,DWORD PTR [rdx+rax*4]
+ 388:	48 01 c1             	add    rcx,rax
+ 38b:	c5 f8 2f c8          	vcomiss xmm1,xmm0
+ 38f:	77 1f                	ja     3b0 <classify_branch_into(Raster const&, float, std::vector<unsigned char, std::allocator<unsigned char> >&)+0x40>
+ 391:	c6 01 00             	mov    BYTE PTR [rcx],0x0
+ 394:	48 8b 57 10          	mov    rdx,QWORD PTR [rdi+0x10]
+ 398:	48 83 c0 01          	add    rax,0x1
+ 39c:	48 8b 4f 18          	mov    rcx,QWORD PTR [rdi+0x18]
+ 3a0:	48 29 d1             	sub    rcx,rdx
+ 3a3:	48 c1 f9 02          	sar    rcx,0x2
+ 3a7:	48 39 c8             	cmp    rax,rcx
+ 3aa:	72 d4                	jb     380 <classify_branch_into(Raster const&, float, std::vector<unsigned char, std::allocator<unsigned char> >&)+0x10>
+ 3ac:	c3                   	ret
+ 3ad:	0f 1f 00             	nop    DWORD PTR [rax]
+ 3b0:	c6 01 01             	mov    BYTE PTR [rcx],0x1
+ 3b3:	48 8b 57 10          	mov    rdx,QWORD PTR [rdi+0x10]
+ 3b7:	48 83 c0 01          	add    rax,0x1
+ 3bb:	48 8b 4f 18          	mov    rcx,QWORD PTR [rdi+0x18]
+ 3bf:	48 29 d1             	sub    rcx,rdx
+ 3c2:	48 c1 f9 02          	sar    rcx,0x2
+ 3c6:	48 39 c8             	cmp    rax,rcx
+ 3c9:	72 b5                	jb     380 <classify_branch_into(Raster const&, float, std::vector<unsigned char, std::allocator<unsigned char> >&)+0x10>
+ 3cb:	c3                   	ret
+ 3cc:	0f 1f 40 00          	nop    DWORD PTR [rax+0x0]
+
+
+===== classify_branchless_into =====
+0000000000000510 <classify_branchless_into(Raster const&, float, std::vector<unsigned char, std::allocator<unsigned char> >&)>:
+ 510:	f3 0f 1e fa          	endbr64
+ 514:	48 8b 4f 10          	mov    rcx,QWORD PTR [rdi+0x10]
+ 518:	48 39 4f 18          	cmp    QWORD PTR [rdi+0x18],rcx
+ 51c:	74 2a                	je     548 <classify_branchless_into(Raster const&, float, std::vector<unsigned char, std::allocator<unsigned char> >&)+0x38>
+ 51e:	31 d2                	xor    edx,edx
+ 520:	c5 fa 10 0c 91       	vmovss xmm1,DWORD PTR [rcx+rdx*4]
+ 525:	48 8b 06             	mov    rax,QWORD PTR [rsi]
+ 528:	c5 f8 2f c8          	vcomiss xmm1,xmm0
+ 52c:	0f 97 04 10          	seta   BYTE PTR [rax+rdx*1]
+ 530:	48 8b 4f 10          	mov    rcx,QWORD PTR [rdi+0x10]
+ 534:	48 8b 47 18          	mov    rax,QWORD PTR [rdi+0x18]
+ 538:	48 83 c2 01          	add    rdx,0x1
+ 53c:	48 29 c8             	sub    rax,rcx
+ 53f:	48 c1 f8 02          	sar    rax,0x2
+ 543:	48 39 c2             	cmp    rdx,rax
+ 546:	72 d8                	jb     520 <classify_branchless_into(Raster const&, float, std::vector<unsigned char, std::allocator<unsigned char> >&)+0x10>
+ 548:	c3                   	ret
+ 549:	0f 1f 80 00 00 00 00 	nop    DWORD PTR [rax+0x0]
+
