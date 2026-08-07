@@ -1,0 +1,54 @@
+Raster Performance Project - Experiment Environment
+
+===== Host =====
+asb9838nu-a05
+
+===== Operating System =====
+PRETTY_NAME="Ubuntu 24.04.4 LTS"
+Linux asb9838nu-a05 7.0.0-28-generic #28~24.04.1-Ubuntu SMP PREEMPT_DYNAMIC Wed Jul  1 15:50:57 UTC 2 x86_64 x86_64 x86_64 GNU/Linux
+
+===== Architecture =====
+x86_64
+
+===== CPU =====
+CPU(s):                                  8
+Model name:                              Intel(R) Core(TM) i7-9700K CPU @ 3.60GHz
+
+===== Cache Hierarchy =====
+L1d cache:                               256 KiB (8 instances)
+L1i cache:                               256 KiB (8 instances)
+L2 cache:                                2 MiB (8 instances)
+L3 cache:                                12 MiB (1 instance)
+
+===== Cache Line Size =====
+64
+
+===== Required SIMD Features =====
+ fma   avx   avx2
+
+===== Compiler =====
+g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+
+===== perf =====
+perf version 7.0.12
+
+===== Valgrind =====
+valgrind-3.22.0
+
+===== taskset =====
+/usr/bin/taskset
+taskset CPU 0 test exit code: 0
+
+===== perf Permission Test =====
+
+ Performance counter stats for 'true':
+
+         1,393,833      cycles
+
+       0.000939008 seconds time elapsed
+
+       0.000000000 seconds user
+       0.000960000 seconds sys
+
+
+perf test exit code: 0
