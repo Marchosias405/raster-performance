@@ -28,6 +28,17 @@ Multiple implementations and input patterns will be compared where they help dem
 
 For the smoothing workload, border cells are copied unchanged. Only interior cells are replaced with the average of their 3x3 neighborhood.
 
+### Smoothing Traversal Variants
+
+Two scalar smoothing implementations are currently available:
+
+- row-major traversal: rows are processed first, then columns
+- column-major traversal: columns are processed first, then rows
+
+The raster storage itself remains row-major and contiguous in both cases.
+
+The implementations have been verified to produce equivalent output. Their performance and cache behavior have not yet been measured.
+
 ## Data
 
 No external dataset is used.
@@ -62,7 +73,7 @@ Initial development environment verified on August 6, 2026:
 
 ## Status
 
-Project setup, deterministic synthetic raster generation, and scalar row-major 3x3 smoothing are implemented.
+Project setup, deterministic synthetic raster generation, scalar row-major smoothing, and alternate column-major smoothing are implemented.
 
 Current verified functionality:
 
@@ -70,13 +81,17 @@ Current verified functionality:
 - deterministic synthetic raster generation
 - raster dimension and reproducibility checks
 - scalar row-major 3x3 average smoothing
-- border cells copied unchanged during smoothing
+- column-major 3x3 average smoothing
+- identical border policy for both smoothing implementations
+- column-major output verified against the row-major baseline
 - hand-created smoothing correctness tests
-- multiple-interior-cell smoothing test
+- generated-raster equivalence test
 - small rasters with no interior cells remain unchanged
 - `make test` workflow
 - Valgrind checks with no reported memory errors or leaks
 
-The column-major, threshold-classification, SIMD, benchmark, compiler-optimization, assembly-analysis, and performance experiments have not been completed yet.
+The two smoothing implementations currently differ in traversal order, but no performance or cache-locality conclusion has been measured yet.
+
+Threshold-classification, SIMD, benchmark, compiler-optimization, assembly-analysis, and performance experiments have not been completed yet.
 
 No benchmark results have been collected yet.

@@ -73,3 +73,45 @@ Raster smooth_row_major(const Raster& input) {
 
     return output;
 }
+
+// Flow:
+// 1. Copy the input so all border cells stay unchanged.
+// 2. Move through interior cells column by column.
+// 3. Add the 9 values in each 3x3 neighborhood.
+// 4. Divide the sum by 9.
+// 5. Store the average in the output raster.
+//
+// Memory experiment:
+// The raster is still stored in row-major contiguous memory.
+// Only the traversal order changes compared with smooth_row_major().
+Raster smooth_column_major(const Raster& input) {
+    Raster output = input;
+
+    // A raster smaller than 3x3 has no interior cells.
+    if (input.width < 3 || input.height < 3) {
+        return output;
+    }
+
+    for (std::size_t column = 1; column < input.width - 1; ++column) {
+        for (std::size_t row = 1; row < input.height - 1; ++row) {
+            const std::size_t top = (row - 1) * input.width + column;
+            const std::size_t middle = row * input.width + column;
+            const std::size_t bottom = (row + 1) * input.width + column;
+
+            const float sum =
+                input.values[top - 1] +
+                input.values[top] +
+                input.values[top + 1] +
+                input.values[middle - 1] +
+                input.values[middle] +
+                input.values[middle + 1] +
+                input.values[bottom - 1] +
+                input.values[bottom] +
+                input.values[bottom + 1];
+
+            output.values[middle] = sum / 9.0f;
+        }
+    }
+
+    return output;
+}

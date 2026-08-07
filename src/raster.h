@@ -37,4 +37,13 @@ Raster generate_synthetic_raster(
 // 3x3 neighborhood from the input raster.
 Raster smooth_row_major(const Raster& input);
 
+// Apply the same 3x3 average smoothing using
+// column-major traversal.
+//
+// The raster is still stored in row-major contiguous memory.
+// Only the loop traversal order changes.
+//
+// Border cells are copied unchanged.
+Raster smooth_column_major(const Raster& input);
+
 #endif

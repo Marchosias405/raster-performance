@@ -154,11 +154,68 @@ void test_smooth_row_major_multiple_interior_cells() {
     assert_close(input.values[5], 9.0f);
 }
 
+// Verify that changing traversal order does not change
+// the mathematical smoothing result.
+//
+// The row-major implementation is our verified baseline.
+// Column-major should produce the same output values.
+void test_smooth_column_major_matches_row_major() {
+    Raster input{
+        4,
+        4,
+        {
+            0.0f, 0.0f, 0.0f, 0.0f,
+            0.0f, 9.0f, 0.0f, 0.0f,
+            0.0f, 0.0f, 0.0f, 0.0f,
+            0.0f, 0.0f, 0.0f, 0.0f
+        }
+    };
+
+    Raster row_output = smooth_row_major(input);
+    Raster column_output = smooth_column_major(input);
+
+    assert(row_output.width == column_output.width);
+    assert(row_output.height == column_output.height);
+    assert(row_output.values.size() == column_output.values.size());
+
+    for (std::size_t index = 0;
+         index < row_output.values.size();
+         ++index) {
+        assert_close(
+            column_output.values[index],
+            row_output.values[index]
+        );
+    }
+}
+
+// Check equivalence on a larger generated raster with
+// multiple rows and columns of interior cells.
+void test_smooth_column_major_generated_raster() {
+    Raster input = generate_synthetic_raster(7, 6);
+
+    Raster row_output = smooth_row_major(input);
+    Raster column_output = smooth_column_major(input);
+
+    assert(row_output.values.size() == column_output.values.size());
+
+    for (std::size_t index = 0;
+         index < row_output.values.size();
+         ++index) {
+        assert_close(
+            column_output.values[index],
+            row_output.values[index]
+        );
+    }
+}
+
 int main() {
     test_synthetic_raster_generation();
     test_smooth_row_major_3x3();
     test_smooth_row_major_small_raster();
     test_smooth_row_major_multiple_interior_cells();
+
+    test_smooth_column_major_matches_row_major();
+    test_smooth_column_major_generated_raster();
 
     std::cout << "All raster tests passed\n";
     return 0;
