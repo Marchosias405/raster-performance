@@ -126,4 +126,24 @@ std::vector<std::uint8_t> classify_branchless(
     float threshold
 );
 
+// Benchmark-oriented classification versions.
+//
+// The caller provides already allocated output storage,
+// so allocation can happen outside the timed region.
+//
+// Each output byte is:
+// 0 = value does not pass
+// 1 = value passes
+void classify_branch_into(
+    const Raster& input,
+    float threshold,
+    std::vector<std::uint8_t>& output
+);
+
+void classify_branchless_into(
+    const Raster& input,
+    float threshold,
+    std::vector<std::uint8_t>& output
+);
+
 #endif

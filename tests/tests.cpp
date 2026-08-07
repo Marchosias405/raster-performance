@@ -476,6 +476,86 @@ void test_classification_grouped_and_shuffled() {
     );
 }
 
+// Verify the benchmark-oriented explicit-branch kernel
+// using hand-created values with known answers.
+//
+// threshold = 0.5
+//
+// 0.25 < 0.5  -> 0
+// 0.50 == 0.5 -> 0
+// 0.75 > 0.5  -> 1
+// -1.0 < 0.5  -> 0
+// 1.0  > 0.5  -> 1
+//
+// The output vector is allocated before calling the kernel.
+// This matches how the benchmark will use the function.
+void test_classify_branch_into() {
+    Raster input{
+        5,
+        1,
+        {
+            0.25f,
+            0.50f,
+            0.75f,
+            -1.0f,
+            1.0f
+        }
+    };
+
+    const std::vector<std::uint8_t> expected{
+        0, 0, 1, 0, 1
+    };
+
+    std::vector<std::uint8_t> output(
+        input.values.size(),
+        99
+    );
+
+    classify_branch_into(
+        input,
+        0.5f,
+        output
+    );
+
+    assert(output == expected);
+}
+
+// Verify the benchmark-oriented branchless-source kernel
+// using the same hand-created values.
+//
+// It must produce exactly the same classification result
+// as the explicit-branch version.
+void test_classify_branchless_into() {
+    Raster input{
+        5,
+        1,
+        {
+            0.25f,
+            0.50f,
+            0.75f,
+            -1.0f,
+            1.0f
+        }
+    };
+
+    const std::vector<std::uint8_t> expected{
+        0, 0, 1, 0, 1
+    };
+
+    std::vector<std::uint8_t> output(
+        input.values.size(),
+        99
+    );
+
+    classify_branchless_into(
+        input,
+        0.5f,
+        output
+    );
+
+    assert(output == expected);
+}
+
 // Compare every value in two rasters using floating-point tolerance.
 void assert_rasters_close(
     const Raster& actual,
@@ -694,6 +774,9 @@ int main() {
     test_classification_all_below_and_above();
     test_classification_controlled_distributions();
     test_classification_grouped_and_shuffled();
+
+    test_classify_branch_into();
+    test_classify_branchless_into();
 
     test_smooth_simd_width_cases();
     test_smooth_simd_border_policy();

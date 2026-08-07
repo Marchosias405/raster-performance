@@ -243,21 +243,26 @@ Raster generate_threshold_raster(
 }
 
 // Flow:
-// 1. Create one output byte for every input cell.
-// 2. Check each value against the threshold.
-// 3. Explicitly choose 1 or 0 with if/else.
-// 4. Return the classification results.
+// 1. Assume output storage is already allocated.
+// 2. Check each input value against the threshold.
+// 3. Explicitly choose 1 or 0 using if/else.
+// 4. Store the result in the existing output vector.
 //
-// Comparison rule:
-// A value passes only when value > threshold.
-std::vector<std::uint8_t> classify_branch(
+// Benchmark purpose:
+// Output allocation can happen before timing.
+//
+// Important:
+// Source-level if/else does NOT prove that machine code
+// contains a conditional branch. We will inspect assembly
+// before running the branch-prediction experiment.
+//
+// Precondition:
+// output has at least input.values.size() elements.
+void classify_branch_into(
     const Raster& input,
-    float threshold
+    float threshold,
+    std::vector<std::uint8_t>& output
 ) {
-    std::vector<std::uint8_t> output(
-        input.values.size()
-    );
-
     for (std::size_t index = 0;
          index < input.values.size();
          ++index) {
@@ -268,21 +273,21 @@ std::vector<std::uint8_t> classify_branch(
             output[index] = 0;
         }
     }
-
-    return output;
 }
 
+// Correctness-friendly wrapper.
+//
 // Flow:
-// 1. Create one output byte for every input cell.
-// 2. Evaluate value > threshold.
-// 3. Convert the boolean result to 0 or 1.
-// 4. Return the classification results.
+// 1. Allocate one output byte for every input cell.
+// 2. Call the benchmark-oriented classification function.
+// 3. Return the completed classification vector.
 //
-// This source code contains no explicit if/else.
+// Comparison rule:
+// A value passes only when value > threshold.
 //
-// We will inspect generated assembly later before deciding
-// whether the resulting machine code is actually branchless.
-std::vector<std::uint8_t> classify_branchless(
+// Benchmarks will use classify_branch_into() directly so
+// allocation does not happen inside the timed region.
+std::vector<std::uint8_t> classify_branch(
     const Raster& input,
     float threshold
 ) {
@@ -290,6 +295,37 @@ std::vector<std::uint8_t> classify_branchless(
         input.values.size()
     );
 
+    classify_branch_into(
+        input,
+        threshold,
+        output
+    );
+
+    return output;
+}
+
+// Flow:
+// 1. Assume output storage is already allocated.
+// 2. Evaluate value > threshold.
+// 3. Convert the boolean result directly to 0 or 1.
+// 4. Store the result in the existing output vector.
+//
+// Benchmark purpose:
+// Output allocation can happen before timing.
+//
+// This source code contains no explicit if/else.
+//
+// Important:
+// We will inspect generated assembly later before deciding
+// whether the resulting machine code is actually branchless.
+//
+// Precondition:
+// output has at least input.values.size() elements.
+void classify_branchless_into(
+    const Raster& input,
+    float threshold,
+    std::vector<std::uint8_t>& output
+) {
     for (std::size_t index = 0;
          index < input.values.size();
          ++index) {
@@ -299,6 +335,30 @@ std::vector<std::uint8_t> classify_branchless(
                 input.values[index] > threshold
             );
     }
+}
+
+// Correctness-friendly wrapper.
+//
+// Flow:
+// 1. Allocate one output byte for every input cell.
+// 2. Call the benchmark-oriented branchless function.
+// 3. Return the completed classification vector.
+//
+// Benchmarks will use classify_branchless_into() directly so
+// allocation does not happen inside the timed region.
+std::vector<std::uint8_t> classify_branchless(
+    const Raster& input,
+    float threshold
+) {
+    std::vector<std::uint8_t> output(
+        input.values.size()
+    );
+
+    classify_branchless_into(
+        input,
+        threshold,
+        output
+    );
 
     return output;
 }
