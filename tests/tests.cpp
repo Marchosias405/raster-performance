@@ -585,6 +585,97 @@ void test_smooth_simd_small_raster() {
     assert(output.values == input.values);
 }
 
+// Verify the benchmark-oriented row-major kernel.
+//
+// The output raster is allocated and initialized before
+// smooth_row_major_into() is called.
+//
+// Its result must match the existing verified
+// smooth_row_major() implementation.
+void test_smooth_row_major_into() {
+    Raster input = generate_synthetic_raster(11, 6);
+
+    // Existing verified implementation.
+    Raster expected = smooth_row_major(input);
+
+    // Allocate and initialize output before calling the kernel.
+    // Copying input here also initializes the border values.
+    Raster output = input;
+
+    smooth_row_major_into(input, output);
+
+    assert_rasters_close(
+        output,
+        expected
+    );
+}
+
+// Verify the benchmark-oriented column-major kernel.
+//
+// The output raster is allocated and initialized before
+// smooth_column_major_into() is called.
+//
+// Its result must match the existing verified
+// smooth_column_major() implementation.
+void test_smooth_column_major_into() {
+    Raster input = generate_synthetic_raster(11, 6);
+
+    // Existing verified implementation.
+    Raster expected = smooth_column_major(input);
+
+    // Allocate and initialize output before the timed-style kernel.
+    Raster output = input;
+
+    smooth_column_major_into(input, output);
+
+    assert_rasters_close(
+        output,
+        expected
+    );
+}
+
+// Verify the benchmark-oriented SIMD kernel.
+//
+// Test several widths so we cover:
+// - scalar tail only
+// - exactly one SIMD vector
+// - SIMD plus tail
+// - multiple SIMD vectors plus tail
+void test_smooth_simd_avx_into() {
+    const std::size_t widths[]{
+        7,
+        10,
+        11,
+        19
+    };
+
+    for (std::size_t width : widths) {
+        Raster input =
+            generate_synthetic_raster(
+                width,
+                6
+            );
+
+        // Existing verified SIMD wrapper.
+        Raster expected =
+            smooth_simd_avx(input);
+
+        // Allocate and initialize output before calling
+        // the benchmark-oriented kernel.
+        Raster output = input;
+
+        smooth_simd_avx_into(
+            input,
+            output
+        );
+
+        assert_rasters_close(
+            output,
+            expected
+        );
+    }
+}
+
 int main() {
     test_synthetic_raster_generation();
     test_smooth_row_major_3x3();
@@ -607,6 +698,12 @@ int main() {
     test_smooth_simd_width_cases();
     test_smooth_simd_border_policy();
     test_smooth_simd_small_raster();
+
+    test_smooth_row_major_into();
+
+    test_smooth_column_major_into();
+
+    test_smooth_simd_avx_into();
 
     std::cout << "All raster tests passed\n";
     return 0;

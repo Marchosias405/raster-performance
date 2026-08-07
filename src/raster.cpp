@@ -1,4 +1,5 @@
 #include "raster.h"
+
 #include <algorithm>
 #include <random>
 #include <stdexcept>
@@ -35,29 +36,44 @@ Raster generate_synthetic_raster(
 }
 
 // Flow:
-// 1. Copy the input so all border cells stay unchanged.
+// 1. Assume output storage is already allocated and initialized.
 // 2. Move through interior cells row by row.
 // 3. Add the 9 values in each 3x3 neighborhood.
 // 4. Divide the sum by 9.
-// 5. Store the average in the output raster.
+// 5. Store the average in the existing output raster.
 //
-// Memory layout:
-// row * width + column converts a 2D coordinate
-// into its position in the contiguous 1D array.
-Raster smooth_row_major(const Raster& input) {
-    Raster output = input;
-
+// Benchmark purpose:
+// Allocation and border initialization can happen before timing.
+//
+// Precondition:
+// output has the same dimensions and number of cells as input.
+void smooth_row_major_into(
+    const Raster& input,
+    Raster& output
+) {
     // A raster smaller than 3x3 has no interior cells.
-    // Returning the copy keeps every value unchanged.
     if (input.width < 3 || input.height < 3) {
-        return output;
+        return;
     }
 
-    for (std::size_t row = 1; row < input.height - 1; ++row) {
-        for (std::size_t column = 1; column < input.width - 1; ++column) {
-            const std::size_t top = (row - 1) * input.width + column;
-            const std::size_t middle = row * input.width + column;
-            const std::size_t bottom = (row + 1) * input.width + column;
+    // Row is the outer loop.
+    for (std::size_t row = 1;
+         row < input.height - 1;
+         ++row) {
+
+        // Column is the inner loop.
+        for (std::size_t column = 1;
+             column < input.width - 1;
+             ++column) {
+
+            const std::size_t top =
+                (row - 1) * input.width + column;
+
+            const std::size_t middle =
+                row * input.width + column;
+
+            const std::size_t bottom =
+                (row + 1) * input.width + column;
 
             const float sum =
                 input.values[top - 1] +
@@ -73,33 +89,63 @@ Raster smooth_row_major(const Raster& input) {
             output.values[middle] = sum / 9.0f;
         }
     }
+}
+
+// Correctness-friendly wrapper.
+//
+// Copying the input preserves the established border policy.
+// Benchmarks will call smooth_row_major_into() directly so
+// this copy does not occur inside the timed kernel.
+Raster smooth_row_major(const Raster& input) {
+    Raster output = input;
+
+    smooth_row_major_into(input, output);
 
     return output;
 }
 
 // Flow:
-// 1. Copy the input so all border cells stay unchanged.
+// 1. Assume output storage is already allocated and initialized.
 // 2. Move through interior cells column by column.
 // 3. Add the 9 values in each 3x3 neighborhood.
 // 4. Divide the sum by 9.
-// 5. Store the average in the output raster.
+// 5. Store the average in the existing output raster.
 //
-// Memory experiment:
-// The raster is still stored in row-major contiguous memory.
-// Only the traversal order changes compared with smooth_row_major().
-Raster smooth_column_major(const Raster& input) {
-    Raster output = input;
-
+// Benchmark purpose:
+// Allocation and border initialization can happen before timing.
+//
+// The arithmetic is the same as row-major smoothing.
+// Only the traversal order changes.
+//
+// Precondition:
+// output has the same dimensions and number of cells as input.
+void smooth_column_major_into(
+    const Raster& input,
+    Raster& output
+) {
     // A raster smaller than 3x3 has no interior cells.
     if (input.width < 3 || input.height < 3) {
-        return output;
+        return;
     }
 
-    for (std::size_t column = 1; column < input.width - 1; ++column) {
-        for (std::size_t row = 1; row < input.height - 1; ++row) {
-            const std::size_t top = (row - 1) * input.width + column;
-            const std::size_t middle = row * input.width + column;
-            const std::size_t bottom = (row + 1) * input.width + column;
+    // Column is the outer loop.
+    for (std::size_t column = 1;
+         column < input.width - 1;
+         ++column) {
+
+        // Row is the inner loop.
+        for (std::size_t row = 1;
+             row < input.height - 1;
+             ++row) {
+
+            const std::size_t top =
+                (row - 1) * input.width + column;
+
+            const std::size_t middle =
+                row * input.width + column;
+
+            const std::size_t bottom =
+                (row + 1) * input.width + column;
 
             const float sum =
                 input.values[top - 1] +
@@ -115,6 +161,17 @@ Raster smooth_column_major(const Raster& input) {
             output.values[middle] = sum / 9.0f;
         }
     }
+}
+
+// Correctness-friendly wrapper.
+//
+// Copying the input preserves the border cells.
+// Benchmarks will call smooth_column_major_into()
+// directly so this copy is outside the timed region.
+Raster smooth_column_major(const Raster& input) {
+    Raster output = input;
+
+    smooth_column_major_into(input, output);
 
     return output;
 }
@@ -152,6 +209,7 @@ Raster generate_threshold_raster(
     raster.height = height;
 
     const std::size_t total_cells = width * height;
+
     const std::size_t pass_count =
         (total_cells * pass_percent) / 100;
 
@@ -160,11 +218,13 @@ Raster generate_threshold_raster(
 
     // Keep failing values first and passing values last.
     // This gives us the grouped input when shuffled == false.
-    const std::size_t first_passing = total_cells - pass_count;
+    const std::size_t first_passing =
+        total_cells - pass_count;
 
     for (std::size_t index = first_passing;
          index < total_cells;
          ++index) {
+
         raster.values[index] = 0.75f;
     }
 
@@ -194,7 +254,9 @@ std::vector<std::uint8_t> classify_branch(
     const Raster& input,
     float threshold
 ) {
-    std::vector<std::uint8_t> output(input.values.size());
+    std::vector<std::uint8_t> output(
+        input.values.size()
+    );
 
     for (std::size_t index = 0;
          index < input.values.size();
@@ -217,21 +279,25 @@ std::vector<std::uint8_t> classify_branch(
 // 4. Return the classification results.
 //
 // This source code contains no explicit if/else.
+//
 // We will inspect generated assembly later before deciding
 // whether the resulting machine code is actually branchless.
 std::vector<std::uint8_t> classify_branchless(
     const Raster& input,
     float threshold
 ) {
-    std::vector<std::uint8_t> output(input.values.size());
+    std::vector<std::uint8_t> output(
+        input.values.size()
+    );
 
     for (std::size_t index = 0;
          index < input.values.size();
          ++index) {
 
-        output[index] = static_cast<std::uint8_t>(
-            input.values[index] > threshold
-        );
+        output[index] =
+            static_cast<std::uint8_t>(
+                input.values[index] > threshold
+            );
     }
 
     return output;

@@ -2,8 +2,8 @@
 #define RASTER_H
 
 #include <cstddef>
-#include <vector>
 #include <cstdint>
+#include <vector>
 
 // A raster is stored as one contiguous 1D array.
 //
@@ -12,7 +12,7 @@
 // - height = number of rows
 // - values stores the cells in row-major order
 //
-// Later, a cell at (row, column) can be accessed with:
+// A cell at (row, column) is located with:
 // row * width + column
 struct Raster {
     std::size_t width;
@@ -22,8 +22,7 @@ struct Raster {
 
 // Generate deterministic synthetic GIS-style raster data.
 //
-// The exact generation formula will be implemented and documented
-// in raster.cpp. The same dimensions must produce the same values.
+// The same dimensions always produce the same values.
 Raster generate_synthetic_raster(
     std::size_t width,
     std::size_t height
@@ -57,6 +56,29 @@ Raster smooth_column_major(const Raster& input);
 // Remaining interior cells are handled by a scalar tail loop.
 Raster smooth_simd_avx(const Raster& input);
 
+// Benchmark-oriented smoothing versions.
+//
+// The caller provides an already allocated and initialized
+// output raster.
+//
+// These functions update only the interior cells so that
+// allocation and border initialization can happen outside
+// the timed benchmark region.
+void smooth_row_major_into(
+    const Raster& input,
+    Raster& output
+);
+
+void smooth_column_major_into(
+    const Raster& input,
+    Raster& output
+);
+
+void smooth_simd_avx_into(
+    const Raster& input,
+    Raster& output
+);
+
 // Generate controlled synthetic data for branch experiments.
 //
 // Values that do not pass are 0.25f.
@@ -64,11 +86,14 @@ Raster smooth_simd_avx(const Raster& input);
 // The later classification threshold will be 0.5f.
 //
 // pass_percent must be from 0 through 100.
-// When shuffled is false, failing values come first and
-// passing values are grouped at the end.
 //
-// When shuffled is true, std::mt19937 with the supplied
-// fixed seed will later be used to shuffle the same values.
+// When shuffled is false:
+// - failing values come first
+// - passing values are grouped at the end
+//
+// When shuffled is true:
+// - the same values are shuffled
+// - std::mt19937 uses the supplied fixed seed
 Raster generate_threshold_raster(
     std::size_t width,
     std::size_t height,
@@ -78,13 +103,21 @@ Raster generate_threshold_raster(
 );
 
 // Explicit if/else classification.
-// A cell passes only when value > threshold.
+//
+// A cell passes only when:
+// value > threshold
+//
+// Output:
+// 0 = does not pass
+// 1 = passes
 std::vector<std::uint8_t> classify_branch(
     const Raster& input,
     float threshold
 );
 
 // Source-level branchless classification.
+//
+// This source version has no explicit if/else.
 //
 // We do not assume this becomes branchless machine code.
 // Generated assembly will be inspected later.
