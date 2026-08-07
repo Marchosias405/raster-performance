@@ -24,6 +24,10 @@ The project will use two main operations:
 
 Multiple implementations and input patterns will be compared where they help demonstrate the systems concepts above.
 
+### 3x3 Smoothing Border Policy
+
+For the smoothing workload, border cells are copied unchanged. Only interior cells are replaced with the average of their 3x3 neighborhood.
+
 ## Data
 
 No external dataset is used.
@@ -58,18 +62,21 @@ Initial development environment verified on August 6, 2026:
 
 ## Status
 
-Project setup and deterministic synthetic raster generation are implemented.
+Project setup, deterministic synthetic raster generation, and scalar row-major 3x3 smoothing are implemented.
 
 Current verified functionality:
 
 - basic project build
 - deterministic synthetic raster generation
-- raster dimension checks
-- reproducibility checks
-- known-value generator checks
+- raster dimension and reproducibility checks
+- scalar row-major 3x3 average smoothing
+- border cells copied unchanged during smoothing
+- hand-created smoothing correctness tests
+- multiple-interior-cell smoothing test
+- small rasters with no interior cells remain unchanged
 - `make test` workflow
-- Valgrind check with no reported memory errors or leaks
+- Valgrind checks with no reported memory errors or leaks
 
-No smoothing, threshold-classification, SIMD, benchmark, or performance experiments have been completed yet.
+The column-major, threshold-classification, SIMD, benchmark, compiler-optimization, assembly-analysis, and performance experiments have not been completed yet.
 
 No benchmark results have been collected yet.

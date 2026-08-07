@@ -28,4 +28,13 @@ Raster generate_synthetic_raster(
     std::size_t height
 );
 
+// Apply 3x3 average smoothing in row-major traversal.
+//
+// Border policy:
+// Border cells are copied unchanged.
+//
+// Each interior output cell is the average of its
+// 3x3 neighborhood from the input raster.
+Raster smooth_row_major(const Raster& input);
+
 #endif
