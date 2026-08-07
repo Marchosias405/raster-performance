@@ -1,5 +1,6 @@
 CXX := g++
 CXXFLAGS := -std=c++17 -Wall -Wextra -Wpedantic
+CPPFLAGS := -Isrc
 
 # Default to an unoptimized build.
 # Later experiments can override this, for example:
@@ -7,19 +8,30 @@ CXXFLAGS := -std=c++17 -Wall -Wextra -Wpedantic
 OPT ?= -O0
 
 BUILD_DIR := build
-TARGET := $(BUILD_DIR)/raster-performance
-SOURCES := src/main.cpp
 
-.PHONY: all run clean
+TARGET := $(BUILD_DIR)/raster-performance
+TEST_TARGET := $(BUILD_DIR)/tests
+
+SOURCES := src/main.cpp
+TEST_SOURCES := tests/tests.cpp src/raster.cpp
+
+.PHONY: all run test clean
 
 all: $(TARGET)
 
 $(TARGET): $(SOURCES)
 	mkdir -p $(BUILD_DIR)
-	$(CXX) $(CXXFLAGS) $(OPT) $(SOURCES) -o $(TARGET)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(OPT) $(SOURCES) -o $(TARGET)
+
+$(TEST_TARGET): $(TEST_SOURCES) src/raster.h
+	mkdir -p $(BUILD_DIR)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(OPT) $(TEST_SOURCES) -o $(TEST_TARGET)
 
 run: $(TARGET)
 	./$(TARGET)
+
+test: $(TEST_TARGET)
+	./$(TEST_TARGET)
 
 clean:
 	rm -rf $(BUILD_DIR)
