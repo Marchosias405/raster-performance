@@ -1,0 +1,107 @@
+src/raster.cpp:61:14: missed: couldn't vectorize loop
+src/raster.cpp:79:39: missed: not vectorized: complicated access pattern.
+src/raster.cpp:66:21: optimized: loop vectorized using 32 byte vectors
+src/raster.cpp:66:21: optimized:  loop versioned for vectorization because of possible aliasing
+src/raster.cpp:66:21: optimized: loop vectorized using 16 byte vectors
+/usr/include/c++/13/bits/new_allocator.h:151:48: missed: statement clobbers memory: _38 = operator new (_34);
+/usr/include/c++/13/bits/stl_algobase.h:437:23: missed: statement clobbers memory: __builtin_memmove (iftmp.7_31, _20, _25);
+src/raster.cpp:102:26: missed: statement clobbers memory: smooth_row_major_into (input_3(D), output_2(D));
+/usr/include/c++/13/bits/new_allocator.h:139:41: missed: statement clobbers memory: std::__throw_bad_array_new_length ();
+/usr/include/c++/13/bits/stl_vector.h:398:25: optimized: basic block part vectorized using 32 byte vectors
+/usr/include/c++/13/bits/stl_vector.h:398:25: optimized: basic block part vectorized using 32 byte vectors
+/usr/include/c++/13/bits/stl_vector.h:398:25: optimized: basic block part vectorized using 32 byte vectors
+src/raster.cpp:133:17: missed: couldn't vectorize loop
+src/raster.cpp:151:39: missed: not vectorized: not suitable for strided load _9 = *_67;
+src/raster.cpp:138:18: optimized: loop vectorized using 8 byte vectors
+src/raster.cpp:138:18: optimized:  loop versioned for vectorization because of possible aliasing
+/usr/include/c++/13/bits/new_allocator.h:151:48: missed: statement clobbers memory: _38 = operator new (_34);
+/usr/include/c++/13/bits/stl_algobase.h:437:23: missed: statement clobbers memory: __builtin_memmove (iftmp.7_31, _20, _25);
+src/raster.cpp:174:29: missed: statement clobbers memory: smooth_column_major_into (input_3(D), output_2(D));
+/usr/include/c++/13/bits/new_allocator.h:139:41: missed: statement clobbers memory: std::__throw_bad_array_new_length ();
+/usr/include/c++/13/bits/stl_vector.h:398:25: optimized: basic block part vectorized using 32 byte vectors
+/usr/include/c++/13/bits/stl_vector.h:398:25: optimized: basic block part vectorized using 32 byte vectors
+/usr/include/c++/13/bits/stl_vector.h:398:25: optimized: basic block part vectorized using 32 byte vectors
+src/raster.cpp:262:16: missed: couldn't vectorize loop
+src/raster.cpp:262:16: missed: not vectorized: control flow in loop.
+/usr/include/c++/13/bits/new_allocator.h:151:48: missed: statement clobbers memory: _41 = operator new (_7);
+/usr/include/c++/13/bits/stl_algobase.h:951:18: missed: statement clobbers memory: __builtin_memset (__first_42, 0, _43);
+/usr/include/c++/13/bits/stl_vector.h:1910:24: missed: statement clobbers memory: std::__throw_length_error ("cannot create std::vector larger than max_size()");
+/usr/include/c++/13/bits/stl_vector.h:100:4: optimized: basic block part vectorized using 32 byte vectors
+src/raster.cpp:294:16: missed: couldn't vectorize loop
+src/raster.cpp:294:16: missed: not vectorized: number of iterations cannot be computed.
+/usr/include/c++/13/bits/new_allocator.h:151:48: missed: statement clobbers memory: _39 = operator new (_7);
+/usr/include/c++/13/bits/stl_algobase.h:951:18: missed: statement clobbers memory: __builtin_memset (__first_40, 0, _41);
+/usr/include/c++/13/bits/stl_vector.h:1910:24: missed: statement clobbers memory: std::__throw_length_error ("cannot create std::vector larger than max_size()");
+/usr/include/c++/13/bits/stl_vector.h:100:4: optimized: basic block part vectorized using 32 byte vectors
+/usr/include/c++/13/bits/new_allocator.h:172:26: missed: statement clobbers memory: operator delete (_7, _15);
+/usr/include/c++/13/bits/new_allocator.h:151:48: missed: statement clobbers memory: _55 = operator new (_86);
+/usr/include/c++/13/bits/new_allocator.h:151:48: missed: statement clobbers memory: _70 = operator new (_69);
+/usr/include/c++/13/bits/stl_algobase.h:931:11: missed: statement clobbers memory: __builtin_memset (__first_45, 0, _91);
+/usr/include/c++/13/bits/stl_uninitialized.h:1131:21: missed: statement clobbers memory: __builtin_memmove (_35, _25, _39);
+/usr/include/c++/13/bits/new_allocator.h:172:26: missed: statement clobbers memory: operator delete (_25, _78);
+/usr/include/c++/13/bits/stl_vector.h:1899:24: missed: statement clobbers memory: std::__throw_length_error ("vector::_M_default_append");
+/usr/include/c++/13/bits/stl_algobase.h:931:11: missed: statement clobbers memory: __builtin_memset (__first_47, 0, _72);
+/usr/include/c++/13/bits/vector.tcc:705:31: missed: not vectorized: vectorization is not profitable.
+/usr/include/c++/13/bits/vector.tcc:705:31: missed: not vectorized: vectorization is not profitable.
+src/raster.cpp:28:39: missed: couldn't vectorize loop
+src/raster.cpp:31:30: missed: not vectorized: no vectype for stmt: *_19 = _4;
+ scalar_type: value_type
+/usr/include/c++/13/bits/stl_vector.h:1016:21: missed: not vectorized: statement can throw an exception: std::vector<float>::_M_default_append (_1, total_cells_13);
+src/raster.h:17:8: missed: statement clobbers memory: std::vector<float>::~vector (_1);
+src/raster.cpp:22:18: missed: not vectorized: vectorization is not profitable.
+/usr/include/c++/13/bits/stl_vector.h:100:4: optimized: basic block part vectorized using 32 byte vectors
+/usr/include/c++/13/bits/random.tcc:412:42: optimized: loop vectorized using 16 byte vectors
+/usr/include/c++/13/bits/random.tcc:404:32: optimized: loop vectorized using 16 byte vectors
+/usr/include/c++/13/bits/uniform_int_dist.h:274:21: missed: couldn't vectorize loop
+/usr/include/c++/13/bits/uniform_int_dist.h:274:21: missed: not vectorized: control flow in loop.
+/usr/include/c++/13/bits/uniform_int_dist.h:367:30: missed: couldn't vectorize loop
+/usr/include/c++/13/bits/uniform_int_dist.h:367:30: missed: not vectorized: control flow in loop.
+/usr/include/c++/13/bits/random.tcc:459:13: missed: statement clobbers memory: std::mersenne_twister_engine<long unsigned int, 32, 624, 397, 31, 2567483615, 11, 4294967295, 7, 2636928640, 15, 4022730752, 18, 1812433253>::_M_gen_rand (__urng_6(D));
+/usr/include/c++/13/bits/uniform_int_dist.h:364:5: missed: statement clobbers memory: _10 = std::uniform_int_distribution<long unsigned int>::operator().isra (__urng_6(D), 0, _9);
+/usr/include/c++/13/bits/random.tcc:459:13: missed: statement clobbers memory: std::mersenne_twister_engine<long unsigned int, 32, 624, 397, 31, 2567483615, 11, 4294967295, 7, 2636928640, 15, 4022730752, 18, 1812433253>::_M_gen_rand (__urng_6(D));
+/usr/include/c++/13/bits/random.tcc:459:13: missed: statement clobbers memory: std::mersenne_twister_engine<long unsigned int, 32, 624, 397, 31, 2567483615, 11, 4294967295, 7, 2636928640, 15, 4022730752, 18, 1812433253>::_M_gen_rand (__urng_6(D));
+/usr/include/c++/13/bits/random.tcc:459:13: missed: statement clobbers memory: std::mersenne_twister_engine<long unsigned int, 32, 624, 397, 31, 2567483615, 11, 4294967295, 7, 2636928640, 15, 4022730752, 18, 1812433253>::_M_gen_rand (__urng_6(D));
+/usr/include/c++/13/bits/stl_algo.h:3787:13: missed: couldn't vectorize loop
+/usr/include/c++/13/bits/uniform_int_dist.h:204:34: missed: statement clobbers memory: _85 = std::uniform_int_distribution<long unsigned int>::operator().isra (__g_17(D), 0, _84);
+/usr/include/c++/13/bits/stl_algo.h:3803:57: missed: couldn't vectorize loop
+/usr/include/c++/13/bits/stl_algo.h:3803:57: missed: not vectorized: loop nest containing two or more consecutive inner loops cannot be vectorized
+/usr/include/c++/13/bits/uniform_int_dist.h:274:21: missed: couldn't vectorize loop
+/usr/include/c++/13/bits/uniform_int_dist.h:274:21: missed: not vectorized: control flow in loop.
+/usr/include/c++/13/bits/uniform_int_dist.h:367:30: missed: couldn't vectorize loop
+/usr/include/c++/13/bits/uniform_int_dist.h:367:30: missed: not vectorized: control flow in loop.
+/usr/include/c++/13/bits/random.tcc:459:13: missed: statement clobbers memory: std::mersenne_twister_engine<long unsigned int, 32, 624, 397, 31, 2567483615, 11, 4294967295, 7, 2636928640, 15, 4022730752, 18, 1812433253>::_M_gen_rand (__g_17(D));
+/usr/include/c++/13/bits/uniform_int_dist.h:364:5: missed: statement clobbers memory: _98 = std::uniform_int_distribution<long unsigned int>::operator().isra (__g_17(D), 0, _97);
+/usr/include/c++/13/bits/random.tcc:459:13: missed: statement clobbers memory: std::mersenne_twister_engine<long unsigned int, 32, 624, 397, 31, 2567483615, 11, 4294967295, 7, 2636928640, 15, 4022730752, 18, 1812433253>::_M_gen_rand (__g_17(D));
+/usr/include/c++/13/bits/random.tcc:459:13: missed: statement clobbers memory: std::mersenne_twister_engine<long unsigned int, 32, 624, 397, 31, 2567483615, 11, 4294967295, 7, 2636928640, 15, 4022730752, 18, 1812433253>::_M_gen_rand (__g_17(D));
+/usr/include/c++/13/bits/random.tcc:459:13: missed: statement clobbers memory: std::mersenne_twister_engine<long unsigned int, 32, 624, 397, 31, 2567483615, 11, 4294967295, 7, 2636928640, 15, 4022730752, 18, 1812433253>::_M_gen_rand (__g_17(D));
+/usr/include/c++/13/bits/uniform_int_dist.h:204:34: missed: statement clobbers memory: _35 = std::uniform_int_distribution<long unsigned int>::operator().isra (__g_17(D), 0, 1);
+/usr/include/c++/13/bits/uniform_int_dist.h:204:34: missed: statement clobbers memory: _85 = std::uniform_int_distribution<long unsigned int>::operator().isra (__g_17(D), 0, _84);
+/usr/include/c++/13/bits/random.tcc:333:32: missed: couldn't vectorize loop
+/usr/include/c++/13/bits/random.tcc:335:14: missed: not vectorized: no vectype for stmt: __x_38 = MEM[(struct mersenne_twister_engine *)&generator]._M_x[_37];
+ scalar_type: long unsigned int
+src/raster.cpp:225:16: optimized: loop vectorized using 32 byte vectors
+src/raster.cpp:225:16: optimized: loop vectorized using 16 byte vectors
+/usr/include/c++/13/bits/stl_algobase.h:930:22: optimized: loop vectorized using 32 byte vectors
+/usr/include/c++/13/bits/stl_algobase.h:930:22: optimized: loop vectorized using 16 byte vectors
+src/raster.cpp:194:8: missed: splitting region at control altering definition _106 = operator new (_105);
+/usr/include/c++/13/bits/new_allocator.h:151:48: missed: not vectorized: statement can throw an exception: _106 = operator new (_105);
+src/raster.cpp:208:18: missed: not vectorized: vectorization is not profitable.
+/usr/include/c++/13/bits/stl_vector.h:100:4: optimized: basic block part vectorized using 32 byte vectors
+/usr/include/c++/13/bits/stl_vector.h:100:4: missed: splitting region at dominance boundary bb10
+/usr/include/c++/13/bits/stl_vector.h:100:4: missed: splitting region at dominance boundary bb17
+/usr/include/c++/13/bits/new_allocator.h:172:26: missed: statement clobbers memory: operator delete (_66, _115);
+/usr/include/c++/13/bits/stl_vector.h:115:13: missed: not vectorized: vectorization is not profitable.
+/usr/include/c++/13/bits/stl_vector.h:115:13: missed: not vectorized: vectorization is not profitable.
+/usr/include/c++/13/bits/stl_vector.h:115:13: missed: not vectorized: vectorization is not profitable.
+src/raster.cpp:194:8: missed: splitting region at dominance boundary bb26
+src/raster.cpp:235:21: missed: statement clobbers memory: std::shuffle<__gnu_cxx::__normal_iterator<float*, std::vector<float> >, std::mersenne_twister_engine<long unsigned int, 32, 624, 397, 31, 2567483615, 11, 4294967295, 7, 2636928640, 15, 4022730752, 18, 1812433253>&> (D.81379, D.81378, &generator);
+/usr/include/c++/13/bits/random.tcc:338:8: missed: splitting region at dominance boundary bb27
+/usr/include/c++/13/bits/random.tcc:338:8: missed: splitting region at dominance boundary bb7
+/usr/include/c++/13/bits/random.tcc:338:8: missed: splitting region at dominance boundary bb24
+/usr/include/c++/13/bits/stl_vector.h:1910:24: missed: not vectorized: statement can throw an exception: std::__throw_length_error ("cannot create std::vector larger than max_size()");
+/usr/include/c++/13/bits/stl_vector.h:1910:24: missed: splitting region at dominance boundary bb3
+src/raster.h:17:8: missed: statement clobbers memory: std::vector<float>::~vector (_2);
+src/raster.cpp:204:9: missed: statement clobbers memory: _29 = __cxa_allocate_exception (16);
+src/raster.cpp:204:9: missed: not vectorized: statement can throw an exception: std::invalid_argument::invalid_argument (_29, "pass_percent must be between 0 and 100");
+src/raster.cpp:204:9: missed: statement clobbers memory: __cxa_throw (_29, &_ZTISt16invalid_argument, __dt_comp );
+src/raster.cpp:204:9: missed: statement clobbers memory: __cxa_free_exception (_29);
