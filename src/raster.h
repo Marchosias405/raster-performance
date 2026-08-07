@@ -47,6 +47,16 @@ Raster smooth_row_major(const Raster& input);
 // Border cells are copied unchanged.
 Raster smooth_column_major(const Raster& input);
 
+// Apply the same 3x3 average smoothing using
+// 256-bit AVX SIMD operations.
+//
+// Eight adjacent float output cells can be processed
+// together in one vector iteration.
+//
+// Border cells are copied unchanged.
+// Remaining interior cells are handled by a scalar tail loop.
+Raster smooth_simd_avx(const Raster& input);
+
 // Generate controlled synthetic data for branch experiments.
 //
 // Values that do not pass are 0.25f.

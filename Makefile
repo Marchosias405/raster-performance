@@ -13,7 +13,7 @@ TARGET := $(BUILD_DIR)/raster-performance
 TEST_TARGET := $(BUILD_DIR)/tests
 
 SOURCES := src/main.cpp
-TEST_SOURCES := tests/tests.cpp src/raster.cpp
+TEST_SOURCES := tests/tests.cpp src/raster.cpp src/raster_simd.cpp
 
 .PHONY: all run test clean
 
@@ -25,7 +25,7 @@ $(TARGET): $(SOURCES)
 
 $(TEST_TARGET): $(TEST_SOURCES) src/raster.h
 	mkdir -p $(BUILD_DIR)
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(OPT) $(TEST_SOURCES) -o $(TEST_TARGET)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(OPT) -mavx $(TEST_SOURCES) -o $(TEST_TARGET)
 
 run: $(TARGET)
 	./$(TARGET)

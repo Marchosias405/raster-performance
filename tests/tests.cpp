@@ -476,6 +476,115 @@ void test_classification_grouped_and_shuffled() {
     );
 }
 
+// Compare every value in two rasters using floating-point tolerance.
+void assert_rasters_close(
+    const Raster& actual,
+    const Raster& expected
+) {
+    assert(actual.width == expected.width);
+    assert(actual.height == expected.height);
+    assert(actual.values.size() == expected.values.size());
+
+    for (std::size_t index = 0;
+         index < actual.values.size();
+         ++index) {
+        assert_close(
+            actual.values[index],
+            expected.values[index]
+        );
+    }
+}
+
+// Verify SIMD smoothing against the scalar row-major baseline.
+//
+// Interior width = raster width - 2.
+//
+// width 7  -> interior width 5  -> less than 8
+// width 10 -> interior width 8  -> exactly one SIMD vector
+// width 11 -> interior width 9  -> one SIMD vector + 1 tail cell
+// width 19 -> interior width 17 -> two SIMD vectors + 1 tail cell
+void test_smooth_simd_width_cases() {
+    const std::size_t widths[]{
+        7,
+        10,
+        11,
+        19
+    };
+
+    for (std::size_t width : widths) {
+        Raster input = generate_synthetic_raster(width, 6);
+
+        Raster scalar_output = smooth_row_major(input);
+        Raster simd_output = smooth_simd_avx(input);
+
+        assert_rasters_close(
+            simd_output,
+            scalar_output
+        );
+    }
+}
+
+// SIMD smoothing must use the same border policy as the
+// scalar implementations: every border value is unchanged.
+void test_smooth_simd_border_policy() {
+    Raster input = generate_synthetic_raster(19, 6);
+    Raster output = smooth_simd_avx(input);
+
+    const std::size_t width = input.width;
+    const std::size_t height = input.height;
+
+    // Top and bottom rows.
+    for (std::size_t column = 0; column < width; ++column) {
+        assert_close(
+            output.values[column],
+            input.values[column]
+        );
+
+        const std::size_t bottom =
+            (height - 1) * width + column;
+
+        assert_close(
+            output.values[bottom],
+            input.values[bottom]
+        );
+    }
+
+    // Left and right columns.
+    for (std::size_t row = 0; row < height; ++row) {
+        const std::size_t left = row * width;
+        const std::size_t right = row * width + (width - 1);
+
+        assert_close(
+            output.values[left],
+            input.values[left]
+        );
+
+        assert_close(
+            output.values[right],
+            input.values[right]
+        );
+    }
+}
+
+// A raster with no interior cells should remain unchanged
+// even when passed to the SIMD implementation.
+void test_smooth_simd_small_raster() {
+    Raster input{
+        2,
+        2,
+        {
+            1.0f, 2.0f,
+            3.0f, 4.0f
+        }
+    };
+
+    Raster output = smooth_simd_avx(input);
+
+    assert(output.width == input.width);
+    assert(output.height == input.height);
+    assert(output.values == input.values);
+}
+
 int main() {
     test_synthetic_raster_generation();
     test_smooth_row_major_3x3();
@@ -494,6 +603,10 @@ int main() {
     test_classification_all_below_and_above();
     test_classification_controlled_distributions();
     test_classification_grouped_and_shuffled();
+
+    test_smooth_simd_width_cases();
+    test_smooth_simd_border_policy();
+    test_smooth_simd_small_raster();
 
     std::cout << "All raster tests passed\n";
     return 0;
