@@ -3,6 +3,7 @@
 
 #include <cstddef>
 #include <vector>
+#include <cstdint>
 
 // A raster is stored as one contiguous 1D array.
 //
@@ -45,5 +46,41 @@ Raster smooth_row_major(const Raster& input);
 //
 // Border cells are copied unchanged.
 Raster smooth_column_major(const Raster& input);
+
+// Generate controlled synthetic data for branch experiments.
+//
+// Values that do not pass are 0.25f.
+// Values that pass are 0.75f.
+// The later classification threshold will be 0.5f.
+//
+// pass_percent must be from 0 through 100.
+// When shuffled is false, failing values come first and
+// passing values are grouped at the end.
+//
+// When shuffled is true, std::mt19937 with the supplied
+// fixed seed will later be used to shuffle the same values.
+Raster generate_threshold_raster(
+    std::size_t width,
+    std::size_t height,
+    std::size_t pass_percent,
+    bool shuffled,
+    std::uint32_t seed
+);
+
+// Explicit if/else classification.
+// A cell passes only when value > threshold.
+std::vector<std::uint8_t> classify_branch(
+    const Raster& input,
+    float threshold
+);
+
+// Source-level branchless classification.
+//
+// We do not assume this becomes branchless machine code.
+// Generated assembly will be inspected later.
+std::vector<std::uint8_t> classify_branchless(
+    const Raster& input,
+    float threshold
+);
 
 #endif

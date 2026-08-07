@@ -1,4 +1,7 @@
 #include "raster.h"
+#include <algorithm>
+#include <random>
+#include <stdexcept>
 
 // Flow:
 // 1. Create a raster with the requested width and height.
@@ -111,6 +114,124 @@ Raster smooth_column_major(const Raster& input) {
 
             output.values[middle] = sum / 9.0f;
         }
+    }
+
+    return output;
+}
+
+// Flow:
+// 1. Check that the requested passing percentage is valid.
+// 2. Create enough cells for width * height.
+// 3. Fill the raster with failing values (0.25f).
+// 4. Replace the required number of cells with passing values (0.75f).
+// 5. Optionally shuffle the same values using a fixed seed.
+// 6. Return the controlled synthetic raster.
+//
+// Dataset provenance:
+// This data is generated entirely by this project's code.
+// No external dataset is used.
+//
+// For totals divisible by 100, pass_percent gives an exact
+// percentage. Otherwise integer division rounds the passing
+// cell count down.
+Raster generate_threshold_raster(
+    std::size_t width,
+    std::size_t height,
+    std::size_t pass_percent,
+    bool shuffled,
+    std::uint32_t seed
+) {
+    if (pass_percent > 100) {
+        throw std::invalid_argument(
+            "pass_percent must be between 0 and 100"
+        );
+    }
+
+    Raster raster;
+    raster.width = width;
+    raster.height = height;
+
+    const std::size_t total_cells = width * height;
+    const std::size_t pass_count =
+        (total_cells * pass_percent) / 100;
+
+    // Start with every cell below the later 0.5f threshold.
+    raster.values.assign(total_cells, 0.25f);
+
+    // Keep failing values first and passing values last.
+    // This gives us the grouped input when shuffled == false.
+    const std::size_t first_passing = total_cells - pass_count;
+
+    for (std::size_t index = first_passing;
+         index < total_cells;
+         ++index) {
+        raster.values[index] = 0.75f;
+    }
+
+    if (shuffled) {
+        // Fixed-seed mt19937 makes the shuffled order reproducible.
+        std::mt19937 generator(seed);
+
+        std::shuffle(
+            raster.values.begin(),
+            raster.values.end(),
+            generator
+        );
+    }
+
+    return raster;
+}
+
+// Flow:
+// 1. Create one output byte for every input cell.
+// 2. Check each value against the threshold.
+// 3. Explicitly choose 1 or 0 with if/else.
+// 4. Return the classification results.
+//
+// Comparison rule:
+// A value passes only when value > threshold.
+std::vector<std::uint8_t> classify_branch(
+    const Raster& input,
+    float threshold
+) {
+    std::vector<std::uint8_t> output(input.values.size());
+
+    for (std::size_t index = 0;
+         index < input.values.size();
+         ++index) {
+
+        if (input.values[index] > threshold) {
+            output[index] = 1;
+        } else {
+            output[index] = 0;
+        }
+    }
+
+    return output;
+}
+
+// Flow:
+// 1. Create one output byte for every input cell.
+// 2. Evaluate value > threshold.
+// 3. Convert the boolean result to 0 or 1.
+// 4. Return the classification results.
+//
+// This source code contains no explicit if/else.
+// We will inspect generated assembly later before deciding
+// whether the resulting machine code is actually branchless.
+std::vector<std::uint8_t> classify_branchless(
+    const Raster& input,
+    float threshold
+) {
+    std::vector<std::uint8_t> output(input.values.size());
+
+    for (std::size_t index = 0;
+         index < input.values.size();
+         ++index) {
+
+        output[index] = static_cast<std::uint8_t>(
+            input.values[index] > threshold
+        );
     }
 
     return output;

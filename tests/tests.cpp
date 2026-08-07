@@ -4,6 +4,7 @@
 #include <cmath>
 #include <iostream>
 #include <vector>
+#include <stdexcept>
 
 // Compare floats with a small tolerance.
 // This is safer than relying on exact equality for calculated results.
@@ -208,6 +209,273 @@ void test_smooth_column_major_generated_raster() {
     }
 }
 
+// Count how many raster values equal a chosen value.
+// Threshold datasets contain exact 0.25f and 0.75f values.
+std::size_t count_value(
+    const Raster& raster,
+    float value
+) {
+    std::size_t count = 0;
+
+    for (float cell : raster.values) {
+        if (cell == value) {
+            ++count;
+        }
+    }
+
+    return count;
+}
+
+// Verify exact 5%, 50%, and 95% passing counts.
+//
+// We use exactly 100 cells so the requested percentages
+// correspond directly to exact cell counts.
+void test_threshold_raster_percentages() {
+    Raster five_percent =
+        generate_threshold_raster(10, 10, 5, false, 12345);
+
+    Raster fifty_percent =
+        generate_threshold_raster(10, 10, 50, false, 12345);
+
+    Raster ninety_five_percent =
+        generate_threshold_raster(10, 10, 95, false, 12345);
+
+    assert(five_percent.values.size() == 100);
+    assert(count_value(five_percent, 0.25f) == 95);
+    assert(count_value(five_percent, 0.75f) == 5);
+
+    assert(count_value(fifty_percent, 0.25f) == 50);
+    assert(count_value(fifty_percent, 0.75f) == 50);
+
+    assert(count_value(ninety_five_percent, 0.25f) == 5);
+    assert(count_value(ninety_five_percent, 0.75f) == 95);
+}
+
+// Verify the grouped 50/50 pattern.
+//
+// Expected:
+// first 50 cells  = 0.25f
+// final 50 cells  = 0.75f
+void test_threshold_raster_grouped_order() {
+    Raster grouped =
+        generate_threshold_raster(10, 10, 50, false, 12345);
+
+    for (std::size_t index = 0; index < 50; ++index) {
+        assert(grouped.values[index] == 0.25f);
+    }
+
+    for (std::size_t index = 50; index < 100; ++index) {
+        assert(grouped.values[index] == 0.75f);
+    }
+}
+
+// Verify that shuffling is deterministic.
+//
+// The same values and same fixed seed must produce
+// the same shuffled order each time.
+void test_threshold_raster_deterministic_shuffle() {
+    constexpr std::uint32_t seed = 12345;
+
+    Raster first =
+        generate_threshold_raster(10, 10, 50, true, seed);
+
+    Raster second =
+        generate_threshold_raster(10, 10, 50, true, seed);
+
+    assert(first.values == second.values);
+
+    // Shuffling must not change how many values pass.
+    assert(count_value(first, 0.25f) == 50);
+    assert(count_value(first, 0.75f) == 50);
+
+    Raster grouped =
+        generate_threshold_raster(10, 10, 50, false, seed);
+
+    // For this fixed test seed, verify that the shuffled
+    // ordering differs from the grouped ordering.
+    assert(first.values != grouped.values);
+}
+
+// Percentages above 100 are invalid.
+void test_threshold_raster_invalid_percentage() {
+    bool threw_exception = false;
+
+    try {
+        generate_threshold_raster(
+            10,
+            10,
+            101,
+            false,
+            12345
+        );
+    } catch (const std::invalid_argument&) {
+        threw_exception = true;
+    }
+
+    assert(threw_exception);
+}
+
+// Verify the exact threshold comparison rule.
+//
+// threshold = 0.5
+//
+// 0.25 < 0.5  -> 0
+// 0.50 == 0.5 -> 0
+// 0.75 > 0.5  -> 1
+//
+// The value exactly equal to the threshold is important:
+// our rule is >, not >=.
+void test_classification_threshold_rule() {
+    Raster input{
+        5,
+        1,
+        {
+            0.25f,
+            0.50f,
+            0.75f,
+            -1.0f,
+            1.0f
+        }
+    };
+
+    const std::vector<std::uint8_t> expected{
+        0, 0, 1, 0, 1
+    };
+
+    const std::vector<std::uint8_t> branch_output =
+        classify_branch(input, 0.5f);
+
+    const std::vector<std::uint8_t> branchless_output =
+        classify_branchless(input, 0.5f);
+
+    assert(branch_output == expected);
+    assert(branchless_output == expected);
+}
+
+// Verify simple edge distributions:
+// every value below the threshold and every value above it.
+void test_classification_all_below_and_above() {
+    Raster all_below{
+        4,
+        1,
+        {
+            0.10f,
+            0.20f,
+            0.30f,
+            0.40f
+        }
+    };
+
+    Raster all_above{
+        4,
+        1,
+        {
+            0.60f,
+            0.70f,
+            0.80f,
+            0.90f
+        }
+    };
+
+    const std::vector<std::uint8_t> expected_below{
+        0, 0, 0, 0
+    };
+
+    const std::vector<std::uint8_t> expected_above{
+        1, 1, 1, 1
+    };
+
+    assert(classify_branch(all_below, 0.5f) == expected_below);
+    assert(classify_branchless(all_below, 0.5f) == expected_below);
+
+    assert(classify_branch(all_above, 0.5f) == expected_above);
+    assert(classify_branchless(all_above, 0.5f) == expected_above);
+}
+
+// Count how many classification outputs contain 1.
+std::size_t count_classified_true(
+    const std::vector<std::uint8_t>& output
+) {
+    std::size_t count = 0;
+
+    for (std::uint8_t value : output) {
+        if (value == 1) {
+            ++count;
+        }
+    }
+
+    return count;
+}
+
+// Verify both classification implementations on the
+// controlled 5%, 50%, and 95% branch datasets.
+void test_classification_controlled_distributions() {
+    const std::size_t percentages[]{
+        5,
+        50,
+        95
+    };
+
+    for (std::size_t pass_percent : percentages) {
+        Raster input = generate_threshold_raster(
+            10,
+            10,
+            pass_percent,
+            true,
+            12345
+        );
+
+        std::vector<std::uint8_t> branch_output =
+            classify_branch(input, 0.5f);
+
+        std::vector<std::uint8_t> branchless_output =
+            classify_branchless(input, 0.5f);
+
+        // Different source styles must give the same answer.
+        assert(branch_output == branchless_output);
+
+        // There are exactly 100 cells, so the expected number
+        // of true classifications equals pass_percent.
+        assert(
+            count_classified_true(branch_output) ==
+            pass_percent
+        );
+    }
+}
+
+// Grouped and shuffled 50/50 inputs contain the same
+// values in different orders.
+//
+// Both should therefore still classify exactly 50 cells as true.
+void test_classification_grouped_and_shuffled() {
+    constexpr std::uint32_t seed = 12345;
+
+    Raster grouped =
+        generate_threshold_raster(10, 10, 50, false, seed);
+
+    Raster shuffled =
+        generate_threshold_raster(10, 10, 50, true, seed);
+
+    std::vector<std::uint8_t> grouped_output =
+        classify_branch(grouped, 0.5f);
+
+    std::vector<std::uint8_t> shuffled_output =
+        classify_branch(shuffled, 0.5f);
+
+    assert(count_classified_true(grouped_output) == 50);
+    assert(count_classified_true(shuffled_output) == 50);
+
+    assert(
+        classify_branch(grouped, 0.5f) ==
+        classify_branchless(grouped, 0.5f)
+    );
+
+    assert(
+        classify_branch(shuffled, 0.5f) ==
+        classify_branchless(shuffled, 0.5f)
+    );
+}
+
 int main() {
     test_synthetic_raster_generation();
     test_smooth_row_major_3x3();
@@ -216,6 +484,16 @@ int main() {
 
     test_smooth_column_major_matches_row_major();
     test_smooth_column_major_generated_raster();
+
+    test_threshold_raster_percentages();
+    test_threshold_raster_grouped_order();
+    test_threshold_raster_deterministic_shuffle();
+    test_threshold_raster_invalid_percentage();
+
+    test_classification_threshold_rule();
+    test_classification_all_below_and_above();
+    test_classification_controlled_distributions();
+    test_classification_grouped_and_shuffled();
 
     std::cout << "All raster tests passed\n";
     return 0;
