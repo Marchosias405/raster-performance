@@ -7,15 +7,14 @@ import matplotlib.pyplot as plt
 RESULTS_DIR = Path("results")
 
 
-# ------------------------------------------------------------
+# -------------------------
 # Graph 1: Memory locality
-#
+
 # Source:
 # results/phase11_locality_summary.csv
-#
-# Compare row-major and column-major median kernel time
-# across the four verified raster sizes.
-# ------------------------------------------------------------
+
+# Compare row-major and column-major median kernel time across the four verified raster sizes.
+# ---------------------------------------------------
 def plot_locality():
     input_file = RESULTS_DIR / "phase11_locality_summary.csv"
     output_file = RESULTS_DIR / "phase15_locality.png"
@@ -94,19 +93,19 @@ def plot_locality():
     print(f"Wrote {output_file}")
 
 
-# ------------------------------------------------------------
+# ---------------------------------------
 # Graph 2: Branch prediction
-#
+
 # Source:
 # results/phase13_branch_summary.csv
-#
+
 # Show branch and branchless median kernel times for:
-#
+
 # grouped 5%, 50%, 95%
 # shuffled 5%, 50%, 95%
-#
+
 # This makes the shuffled 50% branch slowdown easy to see.
-# ------------------------------------------------------------
+# --------------------------------------------------
 def plot_branch_prediction():
     input_file = RESULTS_DIR / "phase13_branch_summary.csv"
     output_file = RESULTS_DIR / "phase15_branch.png"

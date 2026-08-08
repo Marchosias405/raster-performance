@@ -13,7 +13,7 @@
 #include <vector>
 
 // Function-pointer type for the two classification kernels.
-//
+
 // Both kernels:
 // - read the same Raster
 // - use the same threshold
@@ -25,8 +25,8 @@ using Classifier = void (*)(
 );
 
 // Convert a command-line argument to a positive size_t.
-//
-// We reject:
+
+// reject:
 // - empty strings
 // - negative values
 // - non-numeric values
@@ -85,10 +85,10 @@ std::size_t parse_positive_size(
 }
 
 // Parse a passing percentage.
-//
+
 // Valid range:
 // 0 through 100.
-//
+
 // The actual experiment will use:
 // 5%, 50%, and 95%.
 std::size_t parse_percentage(
@@ -132,7 +132,7 @@ std::size_t parse_percentage(
 }
 
 // Calculate elapsed milliseconds using CLOCK_MONOTONIC.
-//
+
 // CLOCK_MONOTONIC is appropriate for elapsed-time measurements
 // because it does not move backwards when wall-clock time changes.
 double elapsed_milliseconds(
@@ -155,10 +155,10 @@ double elapsed_milliseconds(
 }
 
 // Return the median of the recorded running times.
-//
+
 // For an odd number of measurements:
 // use the middle value.
-//
+
 // For an even number:
 // average the two middle values.
 double calculate_median(
@@ -184,7 +184,7 @@ double calculate_median(
 }
 
 // Count how many output cells were classified as true.
-//
+
 // This happens after timing so it does not become part
 // of the measured classification kernel.
 std::size_t count_true(
@@ -204,7 +204,7 @@ int main(
     char* argv[]
 ) {
     // Required format:
-    //
+
     // ./branch-benchmark
     //     <branch|branchless>
     //     <width>
@@ -271,9 +271,9 @@ int main(
             width * height;
 
         // generate_threshold_raster() calculates:
-        //
+
         // total_cells * pass_percent / 100
-        //
+
         // so also reject values that could overflow
         // during that multiplication.
         if (
@@ -317,11 +317,11 @@ int main(
         }
 
         // Fixed experimental constants.
-        //
+
         // threshold_raster uses:
         // 0.25f = fail
         // 0.75f = pass
-        //
+
         // Therefore threshold 0.5f cleanly separates them.
         constexpr float threshold = 0.5f;
 
@@ -330,7 +330,7 @@ int main(
         constexpr std::uint32_t seed = 12345;
 
         // Generate the dataset BEFORE timing.
-        //
+
         // This prevents data generation and shuffling from
         // contaminating classification measurements.
         const Raster input =
@@ -343,7 +343,7 @@ int main(
             );
 
         // Allocate output BEFORE timing.
-        //
+
         // Both kernels overwrite every output element.
         std::vector<std::uint8_t> output(
             input.values.size(),

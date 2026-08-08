@@ -1,2 +1,46 @@
-# Generated build files
+# ======================================
+# Build output
+# ========================================
 build/
+
+# Compiled object files
+*.o
+*.obj
+
+# Compiled executables
+*.exe
+*.out
+
+# Compiler-generated dependency files
+*.d
+
+# ======================================
+# Debug / profiling temporary files
+# =======================================
+*.profraw
+*.profdata
+gmon.out
+callgrind.out.*
+
+# ==============================================
+# Editor / IDE files
+# ==============================================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ==============================================
+# Operating system junk
+# ==============================================
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ============================================
+# Temporary files
+# ============================================
+*.tmp
+*.temp
+*.bak

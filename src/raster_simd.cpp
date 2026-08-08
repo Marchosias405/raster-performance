@@ -10,16 +10,16 @@
 // 5. Divide all 8 sums by 9.
 // 6. Store the 8 results.
 // 7. Finish remaining interior cells with a scalar tail loop.
-//
+
 // Benchmark purpose:
 // Allocation and border initialization can happen before timing.
-//
+
 // SIMD layout:
 // 256 bits / 32 bits per float = 8 float lanes.
-//
+
 // _mm256_loadu_ps is used because the starting addresses are
 // not guaranteed to be aligned to a 32-byte boundary.
-//
+
 // Precondition:
 // output has the same dimensions and number of cells as input.
 void smooth_simd_avx_into(
@@ -40,10 +40,10 @@ void smooth_simd_avx_into(
         std::size_t column = 1;
 
         // Process 8 adjacent interior output cells at once.
-        //
+
         // The last output in the vector is column + 7.
         // Its right neighbor is column + 8.
-        //
+
         // column + 8 <= width - 1 guarantees that
         // the rightmost load reaches at most the border.
         for (;
@@ -203,7 +203,7 @@ void smooth_simd_avx_into(
 }
 
 // Correctness-friendly wrapper.
-//
+
 // Copying the input preserves the established border policy.
 // Benchmarks will call smooth_simd_avx_into() directly so
 // this copy does not occur inside the timed kernel.

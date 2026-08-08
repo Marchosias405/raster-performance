@@ -38,7 +38,7 @@ double elapsed_milliseconds(
 }
 
 // Calculate the median timing.
-//
+
 // Median is useful because one unusually slow run has
 // less influence than it would on an average.
 double calculate_median(
@@ -64,7 +64,7 @@ double calculate_median(
 }
 
 // Use the final output after timing.
-//
+
 // This gives us a simple correctness sanity value and
 // ensures the produced output is actually observed.
 double calculate_checksum(
@@ -80,7 +80,7 @@ double calculate_checksum(
 }
 
 // Convert a command-line argument to a positive size.
-//
+
 // Width, height, and repetitions must:
 // - contain digits only
 // - be greater than zero
@@ -163,12 +163,12 @@ int main(
     char* argv[]
 ) {
     // Expected command:
-    //
+
     // ./build/raster-performance <implementation>
     //     <width> <height> <repetitions>
-    //
+
     // Example:
-    //
+
     // ./build/raster-performance row 1024 1024 7
 
     if (argc != 5) {
@@ -227,7 +227,7 @@ int main(
         times.reserve(repetitions);
 
         // Repeat the same kernel several times.
-        //
+
         // The output does not need to be reallocated between
         // repetitions because every interior cell is overwritten
         // from the unchanged input raster.
@@ -249,12 +249,12 @@ int main(
                 );
             }
 
-            // ---------------- TIMED REGION ----------------
+            // --------- TIMED REGION ----------------
             kernel(
                 input,
                 output
             );
-            // -------------- END TIMED REGION --------------
+            // --------- END TIMED REGION --------------
 
             if (
                 clock_gettime(
