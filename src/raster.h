@@ -20,7 +20,6 @@ struct Raster {
     std::vector<float> values;
 };
 
-// Generate deterministic synthetic GIS-style raster data.
 
 // The same dimensions always produce the same values.
 Raster generate_synthetic_raster(
@@ -34,10 +33,9 @@ Raster generate_synthetic_raster(
 // Each interior output cell is the average of its 3x3 neighborhood from the input raster.
 Raster smooth_row_major(const Raster& input);
 
-// Apply the same 3x3 average smoothing using
-// column-major traversal.
+// Apply the same 3x3 average smoothing using column-major traversal.
 
-// The raster is still stored in row-major contiguous memory.
+// The raster still stored in row-major contiguous memory.
 // Only the loop traversal order changes.
 
 // Border cells are copied unchanged.
@@ -47,15 +45,10 @@ Raster smooth_column_major(const Raster& input);
 
 // Eight adjacent float output cells can be processed together in one vector iteration.
 
-// Border cells are copied unchanged.
-// Remaining interior cells are handled by a scalar tail loop.
+// Border cells are copied unchanged. Remaining interior cells are handled by a scalar tail loop.
 Raster smooth_simd_avx(const Raster& input);
 
 // Benchmark-oriented smoothing versions.
-
-// The caller provides an already allocated and initialized output raster.
-
-// These functions update only the interior cells so that allocation and border initialization can happen outside the timed benchmark region.
 void smooth_row_major_into(
     const Raster& input,
     Raster& output
@@ -96,8 +89,7 @@ Raster generate_threshold_raster(
 
 // Explicit if/else classification.
 
-// A cell passes only when:
-// value > threshold
+// A cell passes only when: value > threshold
 
 // Output:
 // 0 = does not pass
@@ -108,20 +100,12 @@ std::vector<std::uint8_t> classify_branch(
 );
 
 // Source-level branchless classification.
-
-// This source version has no explicit if/else.
-
-// Do not assume this becomes branchless machine code.
-
 std::vector<std::uint8_t> classify_branchless(
     const Raster& input,
     float threshold
 );
 
 // Benchmark-oriented classification versions.
-
-// The caller provides already allocated output storage,
-// so allocation can happen outside the timed region.
 
 // Each output byte is:
 // 0 = value does not pass

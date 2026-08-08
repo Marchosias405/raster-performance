@@ -10,8 +10,7 @@
 #include <vector>
 #include <limits>
 
-// A benchmark kernel takes an input raster and writes
-// into an already allocated output raster.
+// A benchmark kernel takes an input raster and writes into an already allocated output raster.
 using SmoothingKernel = void (*)(
     const Raster&,
     Raster&
@@ -39,8 +38,7 @@ double elapsed_milliseconds(
 
 // Calculate the median timing.
 
-// Median is useful because one unusually slow run has
-// less influence than it would on an average.
+
 double calculate_median(
     std::vector<double> times
 ) {
@@ -65,8 +63,6 @@ double calculate_median(
 
 // Use the final output after timing.
 
-// This gives us a simple correctness sanity value and
-// ensures the produced output is actually observed.
 double calculate_checksum(
     const Raster& raster
 ) {
@@ -91,7 +87,7 @@ std::size_t parse_positive_size(
 ) {
     const std::string value_text(text);
 
-    // Reject empty values and characters such as:
+    // Reject empty values and characters like:
     // -, +, letters, decimal points, etc.
     if (value_text.empty()) {
         throw std::invalid_argument(
@@ -137,7 +133,7 @@ std::size_t parse_positive_size(
     }
 }
 
-// Select which smoothing implementation will be timed.
+// Select the smoothing implementation that'll be timed.
 SmoothingKernel select_kernel(
     const std::string& implementation
 ) {
@@ -211,16 +207,14 @@ int main(
                 implementation
             );
 
-        // Dataset generation is deliberately outside
-        // the timed benchmark region.
+        // Dataset generation is deliberately outside the timed benchmark region.
         const Raster input =
             generate_synthetic_raster(
                 width,
                 height
             );
 
-        // Output allocation and border initialization are
-        // also deliberately outside the timed region.
+        // Output allocation and border initialization are also deliberately outside the timed region.
         Raster output = input;
 
         std::vector<double> times;
@@ -228,9 +222,6 @@ int main(
 
         // Repeat the same kernel several times.
 
-        // The output does not need to be reallocated between
-        // repetitions because every interior cell is overwritten
-        // from the unchanged input raster.
         for (std::size_t repetition = 0;
              repetition < repetitions;
              ++repetition) {

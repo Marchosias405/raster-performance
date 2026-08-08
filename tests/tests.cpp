@@ -7,7 +7,6 @@
 #include <stdexcept>
 
 // Compare floats with a small tolerance.
-// Safer than relying on exact equality for calculated results.
 void assert_close(
     float actual,
     float expected,
@@ -48,8 +47,6 @@ void test_synthetic_raster_generation() {
     assert_close(large_enough.values[1000], 0.000f);
 }
 
-// Hand-created test data.
-
 // Input:
 //  1   2   3
 //  4  14   6
@@ -60,7 +57,6 @@ void test_synthetic_raster_generation() {
 // = 54 / 9
 // = 6
 
-// Border cells should stay unchanged.
 void test_smooth_row_major_3x3() {
     Raster input{
         3,
@@ -89,9 +85,8 @@ void test_smooth_row_major_3x3() {
     }
 }
 
-// A raster smaller than 3x3 has no interior cell.
+// A raster smaller than 3x3 has no interior cell. (values unchanged)
 
-// The smoothing function should therefore return the values unchanged.
 void test_smooth_row_major_small_raster() {
     Raster input{
         2,
@@ -109,17 +104,13 @@ void test_smooth_row_major_small_raster() {
     assert(output.values == input.values);
 }
 
-// Hand-created 4x4 test with four interior cells.
-
 // Input:
 // 0  0  0  0
 // 0  9  0  0
 // 0  0  0  0
 // 0  0  0  0
 
-// The value 9 is inside the 3x3 neighborhood of all four interior cells.
-
-// Therefore each interior average is:
+// interior average is:
 // 9 / 9 = 1
 
 // Border cells remain unchanged.
@@ -148,14 +139,10 @@ void test_smooth_row_major_multiple_interior_cells() {
         assert_close(output.values[index], expected[index]);
     }
 
-    // Smoothing writes to a separate output raster, so the original input must stay unchanged.
+    // Smoothing writes to a separate output raster, the original input must stay unchanged.
     assert_close(input.values[5], 9.0f);
 }
 
-// Verify that changing traversal order does not change the mathematical smoothing result.
-
-// The row-major implementation is the verified baseline.
-// Column-major should produce the same output values.
 void test_smooth_column_major_matches_row_major() {
     Raster input{
         4,
@@ -223,7 +210,6 @@ std::size_t count_value(
 
 // Verify exact 5%, 50%, and 95% passing counts.
 
-// Use exactly 100 cells so the requested percentages correspond directly to exact cell counts.
 void test_threshold_raster_percentages() {
     Raster five_percent =
         generate_threshold_raster(10, 10, 5, false, 12345);
@@ -245,7 +231,6 @@ void test_threshold_raster_percentages() {
     assert(count_value(ninety_five_percent, 0.75f) == 95);
 }
 
-// Verify the grouped 50/50 pattern.
 
 // Expected:
 // first 50 cells  = 0.25f
@@ -265,7 +250,6 @@ void test_threshold_raster_grouped_order() {
 
 
 
-// The same values and same fixed seed must produce the same shuffled order each time.
 void test_threshold_raster_deterministic_shuffle() {
     constexpr std::uint32_t seed = 12345;
 
@@ -307,7 +291,6 @@ void test_threshold_raster_invalid_percentage() {
     assert(threw_exception);
 }
 
-// Verify the exact threshold comparison rule.
 
 // threshold = 0.5
 
@@ -420,10 +403,8 @@ void test_classification_controlled_distributions() {
         std::vector<std::uint8_t> branchless_output =
             classify_branchless(input, 0.5f);
 
-        // Different source styles must give the same answer.
         assert(branch_output == branchless_output);
 
-        // There are exactly 100 cells, so the expected number of true classifications equals pass_percent.
         assert(
             count_classified_true(branch_output) ==
             pass_percent
@@ -431,10 +412,6 @@ void test_classification_controlled_distributions() {
     }
 }
 
-// Grouped and shuffled 50/50 inputs contain the same
-// values in different orders.
-
-// Both should therefore still classify exactly 50 cells as true.
 void test_classification_grouped_and_shuffled() {
     constexpr std::uint32_t seed = 12345;
 
@@ -464,7 +441,6 @@ void test_classification_grouped_and_shuffled() {
     );
 }
 
-// Verify the benchmark-oriented explicit-branch kernel using hand-created values with known answers.
 
 // threshold = 0.5
 
@@ -475,7 +451,6 @@ void test_classification_grouped_and_shuffled() {
 // 1.0  > 0.5  -> 1
 
 // The output vector is allocated before calling the kernel.
-// This matches how the benchmark will use the function.
 void test_classify_branch_into() {
     Raster input{
         5,
@@ -507,8 +482,6 @@ void test_classify_branch_into() {
     assert(output == expected);
 }
 
-// Verify the benchmark-oriented branchless-source kernel
-// using the same hand-created values.
 
 // Must produce exactly the same classification result as the explicit-branch version.
 void test_classify_branchless_into() {
@@ -561,8 +534,6 @@ void assert_rasters_close(
     }
 }
 
-// Verify SIMD smoothing against the scalar row-major baseline.
-
 // Interior width = raster width - 2.
 
 // width 7  -> interior width 5  -> less than 8
@@ -590,7 +561,6 @@ void test_smooth_simd_width_cases() {
     }
 }
 
-// SIMD smoothing must use the same border policy as the scalar implementations: every border value is unchanged.
 void test_smooth_simd_border_policy() {
     Raster input = generate_synthetic_raster(19, 6);
     Raster output = smooth_simd_avx(input);
@@ -650,9 +620,6 @@ void test_smooth_simd_small_raster() {
     assert(output.values == input.values);
 }
 
-// Verify the benchmark-oriented row-major kernel.
-
-// The output raster is allocated and initialized before smooth_row_major_into() is called.
 
 // Its result must match the existing verified smooth_row_major() implementation.
 void test_smooth_row_major_into() {
@@ -662,7 +629,7 @@ void test_smooth_row_major_into() {
     Raster expected = smooth_row_major(input);
 
     // Allocate and initialize output before calling the kernel.
-    // Copying input here also initializes the border values.
+    // Copying input initializes the border values.
     Raster output = input;
 
     smooth_row_major_into(input, output);
@@ -677,7 +644,6 @@ void test_smooth_row_major_into() {
 
 // The output raster is allocated and initialized before smooth_column_major_into() is called.
 
-// Its result must match the existing verified smooth_column_major() implementation.
 void test_smooth_column_major_into() {
     Raster input = generate_synthetic_raster(11, 6);
 
@@ -695,9 +661,8 @@ void test_smooth_column_major_into() {
     );
 }
 
-// Verify the benchmark-oriented SIMD kernel.
 
-// Test several widths so cover:
+// Test a few widths so cover:
 // - scalar tail only
 // - exactly one SIMD vector
 // - SIMD plus tail

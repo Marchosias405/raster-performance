@@ -11,17 +11,13 @@
 // 6. Store the 8 results.
 // 7. Finish remaining interior cells with a scalar tail loop.
 
-// Benchmark purpose:
-// Allocation and border initialization can happen before timing.
+// Benchmark purpose: Allocation and border initialization can happen before timing.
 
-// SIMD layout:
-// 256 bits / 32 bits per float = 8 float lanes.
+// SIMD layout: 256 bits / 32 bits per float = 8 float lanes.
 
-// _mm256_loadu_ps is used because the starting addresses are
-// not guaranteed to be aligned to a 32-byte boundary.
+// _mm256_loadu_ps is used because the starting addresses are not guaranteed to be aligned to a 32-byte boundary.
 
-// Precondition:
-// output has the same dimensions and number of cells as input.
+// Precondition: output has the same dimensions and number of cells as input.
 void smooth_simd_avx_into(
     const Raster& input,
     Raster& output
@@ -44,8 +40,7 @@ void smooth_simd_avx_into(
         // The last output in the vector is column + 7.
         // Its right neighbor is column + 8.
 
-        // column + 8 <= width - 1 guarantees that
-        // the rightmost load reaches at most the border.
+        // column + 8 <= width - 1 guarantees that the rightmost load reaches at most the border.
         for (;
              column + 8 <= input.width - 1;
              column += 8) {
@@ -170,8 +165,7 @@ void smooth_simd_avx_into(
             );
         }
 
-        // Scalar tail:
-        // Handle any interior cells left after groups of 8.
+        // Scalar tail: Handle any interior cells left after groups of 8.
         for (;
              column < input.width - 1;
              ++column) {
@@ -202,11 +196,7 @@ void smooth_simd_avx_into(
     }
 }
 
-// Correctness-friendly wrapper.
-
-// Copying the input preserves the established border policy.
-// Benchmarks will call smooth_simd_avx_into() directly so
-// this copy does not occur inside the timed kernel.
+// Benchmarks will call smooth_simd_avx_into() directly so this copy does not occur inside the timed kernel.
 Raster smooth_simd_avx(const Raster& input) {
     Raster output = input;
 

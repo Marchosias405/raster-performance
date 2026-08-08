@@ -10,9 +10,8 @@
 // 3. Generate each value from its 1D array index.
 // 4. Return the completed synthetic raster.
 
-// Dataset provenance:
-// These values are generated entirely by this project's code.
-// No external GIS dataset is used.
+
+// Generate the datasets entirely using the project's code without using external GIS datasets
 Raster generate_synthetic_raster(
     std::size_t width,
     std::size_t height
@@ -45,8 +44,7 @@ Raster generate_synthetic_raster(
 // Benchmark purpose:
 // Allocation and border initialization can happen before timing.
 
-// Precondition:
-// output has the same dimensions and number of cells as input.
+// Precondition: output has the same dimensions and number of cells as input.
 void smooth_row_major_into(
     const Raster& input,
     Raster& output
@@ -93,7 +91,7 @@ void smooth_row_major_into(
 
 
 
-// Copying the input preserves the established border policy.
+
 // Benchmarks will call smooth_row_major_into() directly so this copy does not occur inside the timed kernel.
 Raster smooth_row_major(const Raster& input) {
     Raster output = input;
@@ -110,14 +108,12 @@ Raster smooth_row_major(const Raster& input) {
 // 4. Divide the sum by 9.
 // 5. Store the average in the existing output raster.
 
-// Benchmark purpose:
-// Allocation and border initialization can happen before timing.
+// Benchmark purpose: Allocation and border initialization can happen before timing.
 
 // The arithmetic is the same as row-major smoothing.
 // Only the traversal order changes.
 
-// Precondition:
-// output has the same dimensions and number of cells as input.
+// Precondition: output has the same dimensions and number of cells as input.
 void smooth_column_major_into(
     const Raster& input,
     Raster& output
@@ -165,8 +161,7 @@ void smooth_column_major_into(
 
 
 // Copying the input preserves the border cells.
-// Benchmarks will call smooth_column_major_into()
-// directly so this copy is outside the timed region.
+// Benchmarks will call smooth_column_major_into() directly so this copy is outside the timed region.
 Raster smooth_column_major(const Raster& input) {
     Raster output = input;
 
@@ -182,10 +177,6 @@ Raster smooth_column_major(const Raster& input) {
 // 4. Replace the required number of cells with passing values (0.75f).
 // 5. Shuffle the same values using a fixed seed.
 // 6. Return the controlled synthetic raster.
-
-// Dataset provenance:
-// This data is generated entirely by this project's code.
-// No external dataset is used.
 
 // For totals divisible by 100, pass_percent gives an exact percentage. Otherwise integer division rounds the passing cell count down.
 Raster generate_threshold_raster(
@@ -248,13 +239,7 @@ Raster generate_threshold_raster(
 // Benchmark purpose:
 // Output allocation can happen before timing.
 
-// Important:
-// Source-level if/else does NOT prove that machine code
-// contains a conditional branch. We will inspect assembly
-// before running the branch-prediction experiment.
-
-// Precondition:
-// output has at least input.values.size() elements.
+// Precondition: output has at least input.values.size() elements.
 void classify_branch_into(
     const Raster& input,
     float threshold,
@@ -271,8 +256,6 @@ void classify_branch_into(
         }
     }
 }
-
-// Correctness-friendly wrapper.
 
 // Flow:
 // 1. Allocate one output byte for every input cell.
@@ -306,13 +289,10 @@ std::vector<std::uint8_t> classify_branch(
 // 3. Convert the boolean result directly to 0 or 1.
 // 4. Store the result in the existing output vector.
 
-// Benchmark purpose:
-// Output allocation can happen before timing.
 
 // This source code contains no explicit if/else.
 
-// Precondition:
-// output has at least input.values.size() elements.
+// Precondition: output has at least input.values.size() elements.
 void classify_branchless_into(
     const Raster& input,
     float threshold,
@@ -329,15 +309,12 @@ void classify_branchless_into(
     }
 }
 
-// Correctness-friendly wrapper.
 
 // Flow:
 // 1. Allocate one output byte for every input cell.
 // 2. Call the benchmark-oriented branchless function.
 // 3. Return the completed classification vector.
-//
-// Benchmarks will use classify_branchless_into() directly so
-// allocation does not happen inside the timed region.
+// Benchmarks uses classify_branchless_into() directly so allocation does not happen inside the timed region.
 std::vector<std::uint8_t> classify_branchless(
     const Raster& input,
     float threshold
